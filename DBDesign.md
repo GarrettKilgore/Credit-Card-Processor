@@ -2,85 +2,86 @@
 
 ## Data Organization
 
-### 1. Merchant Table
-**Purpose**: Keep track of merchant information including authentication and banking details.
+---
 
-**Partition Key**: MerchantID (String)  
-**Sort Key**: AuthToken (String)
+## 1. Merchant Table
+Purpose: Keep track of merchant information including authentication and banking details.
 
-**Other Attributes**:
+**Partition Key:** MerchantID (String)  
+**Sort Key:** AuthToken (String)
+
+**Other Attributes:**
 - MerchantName (String)
-- BankID (String) - Reference to Bank table
+- BankID (String) — reference to Bank table
 - MerchantAccountNumber (String)
-- Status (String) - Active/Inactive
+- Status (String)
 
-**Rationale**: 
-- Using MerchantID instead of name prevents duplicate business names and provides stable identifier
-- AuthToken as sort key allows for token rotation while keeping same MerchantID
-- BankID prevents typos like "WElls Fargo" vs "Wells Fargo" - enforces referential integrity
-- Account numbers as strings preserve leading zeros
+**Rationale:**
+- MerchantID prevents duplicate or misspelled merchant names.
+- AuthToken as sort key allows token rotation while keeping the same MerchantID.
+- BankID enforces referential integrity and prevents typos like “WElls Fargo”.
+- Account numbers stored as strings preserve formatting and leading zeros.
 
 ---
 
-### 2. Bank Table
-**Purpose**: Master list of banks and their API integration information.
+## 2. Bank Table
+Purpose: Master list of banks and their API integration information.
 
-**Partition Key**: BankID (String)  
-**Sort Key**: BankID (String)
+**Partition Key:** BankID (String)
 
-**Other Attributes**:
+**Other Attributes:**
 - BankName (String)
 - APIEndpoint (String)
 - APIKey (String)
-- Status (String) - Active/Inactive
+- Status (String)
 
-**Rationale**:
-- Standardized BankID (e.g., "WELLS_FARGO", "CHASE") eliminates spelling errors
-- Centralized API configuration - easy to update without touching merchant/transaction data
-- Application validates BankID against this table to prevent invalid references
+**Rationale:**
+- Standardized BankID eliminates spelling errors.
+- Centralized API configuration allows updates without modifying merchant or transaction data.
+- Application validates BankID before writes to prevent invalid references.
 
 ---
 
-### 3. Transaction Table
-**Purpose**: Records all transaction attempts for customer and merchant banks.
+## 3. Transaction Table
+Purpose: Records all transaction attempts for customer and merchant banks.
 
-**Partition Key**: TransactionID (String)  
-**Sort Key**: Timestamp (String)
+**Partition Key:** TransactionID (String)
 
-**Other Attributes**:
+**Other Attributes:**
 - MerchantID (String)
-- CreditCardNumber (String) - encrypted/tokenized
-- CustomerBankID (String) - Customer's credit card bank
-- MerchantBankID (String) - Merchant's deposit bank
-- Amount (Number) - In cents to avoid floating-point errors
-- Status (String) - Pending/Approved/Declined/Failed
+- CreditCardNumber (String)
+- CustomerBankID (String)
+- MerchantBankID (String)
+- Amount (Number) — stored in cents
+- Timestamp (String)
+- Status (String)
 - AuthToken (String)
 - ResponseCode (String)
 - ResponseMessage (String)
 
-**Rationale**:
-- **Credit card as String**: Preserves leading zeros, not used in math operations, prevents overflow
-- **Amount in cents**: Avoids floating-point precision errors in financial calculations
-- Separate customer and merchant bank fields track both sides of transaction
-- Timestamp as sort key enables efficient time-range queries
+**Rationale:**
+- Credit card numbers stored as strings preserve leading zeros and avoid numeric overflow.
+- Amount stored in cents avoids floating‑point precision errors.
+- Separate customer and merchant bank fields track both sides of the transaction.
+- Timestamp supports chronological sorting and future GSIs.
 
 ---
 
 ## Key Design Decisions
 
-**Why String for Credit Card Numbers?**
-- Preserves leading zeros
-- Not used in mathematical operations
-- Prevents overflow issues
-- Easier to format and tokenize
+### Why String for Credit Card Numbers?
+- Preserves leading zeros  
+- Not used in math  
+- Prevents overflow  
+- Easier to tokenize  
 
-**How to Handle Bank Identification?**
-- Use BankID instead of names to prevent typos (WElls vs Wells)
-- Application validates BankID against Bank table before writes
-- Controlled vocabulary eliminates human error
+### How to Handle Bank Identification?
+- Use BankID instead of names to prevent typos  
+- Validate BankID against Bank table  
+- Controlled vocabulary eliminates human error  
 
-**Fixing Bad Data?**
-- **Do**: Validate inputs before writes (check BankID exists, amounts are positive)
-- **Do**: Normalize simple things (trim whitespace, standardize BankID format)
-- **Don't**: Silently fix critical data - fail loudly with clear errors
-- **Always**: Log validation failures for debugging
+### Fixing Bad Data?
+- Validate inputs before writes  
+- Normalize simple formatting issues  
+- Do not silently “fix” critical data  
+- Log validation failures for debugging  
