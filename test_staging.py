@@ -30,18 +30,18 @@ print("\n=== RUNNING STAGING TESTS ===\n")
 # ─── MERCHANT AUTH TESTS ───
 print("--- Merchant Auth ---")
 test(
-    "Valid merchant auth",
+    "Jeff's Bank debit accepted",
     {
         "bank": "Jeffs Bank",
         "merchant_name": "Contact Climbing",
         "merchant_token": "BqzXGsPJ",
-        "card_holder": "Liam Carter",
-        "cc_number": "4532756279624064",
-        "card_type": "credit",
-        "cvv": "648",
+        "card_holder": "Mia Thompson",
+        "cc_number": "4485921786505210",
+        "card_type": "debit",
+        "cvv": "512",
         "amount": "3.25",
-        "card_zip": "84770",
-        "exp_date": "04/28",
+        "card_zip": "84101",
+        "exp_date": "03/29",
         "timestamp": "2026-04-27T00:00:00"
     },
     "Accepted"
