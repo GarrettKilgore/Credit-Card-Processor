@@ -41,8 +41,12 @@ def lambda_handler(event, context):
 
     merchant_name = inbound.get("merchant_name")
     merchant_token = inbound.get("merchant_token")
-
+    
     # Authenticate merchant
+    if not merchant_name or not merchant_token:
+        write_transaction_log(None, inbound.get("bank"), inbound.get("cc_number"), inbound.get("amount"), "Error")
+        return respond("Merchant Not Authorized.")
+
     response = merchant_table.get_item(Key={"Name": merchant_name, "Token": merchant_token})
     if "Item" not in response:
         write_transaction_log(merchant_name, inbound.get("bank"), inbound.get("cc_number"), inbound.get("amount"), "Error")
