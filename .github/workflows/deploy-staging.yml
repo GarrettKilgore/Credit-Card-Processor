@@ -22,7 +22,8 @@ jobs:
 
       - name: Deploy to Lambda
         run: |
-          zip function.zip LambdaCode.py
+          cp LambdaCode.py lambda_function.py
+          zip function.zip lambda_function.py
           aws lambda update-function-code \
             --function-name processCard \
             --zip-file fileb://function.zip
