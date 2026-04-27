@@ -1,0 +1,43 @@
+name: Deploy to Production
+
+on:
+  workflow_run:
+    workflows: ["Run Tests Against Staging"]
+    types:
+      - completed
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to production (default stage)
+        run: |
+          zip function.zip LambdaCode.py
+          aws lambda update-function-code \
+            --function-name processCard \
+            --zip-file fileb://function.zip
+
+      - name: Wait for Lambda update to complete
+        run: |
+          aws lambda wait function-updated \
+            --function-name processCard
+
+      - name: Publish production version
+        run: |
+          VERSION=$(aws lambda publish-version \
+            --function-name processCard \
+            --query 'Version' \
+            --output text)
+          echo "Deployed to production — version $VERSION"
