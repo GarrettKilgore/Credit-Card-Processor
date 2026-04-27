@@ -1,0 +1,29 @@
+name: Run Tests Against Staging
+
+on:
+  workflow_run:
+    workflows: ["Deploy to Staging"]
+    types:
+      - completed
+
+jobs:
+  test-staging:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run tests
+        run: python test_staging.py
+        env:
+          STAGING_URL: https://j1rbrsjcm6.execute-api.us-west-2.amazonaws.com/staging/processCard
