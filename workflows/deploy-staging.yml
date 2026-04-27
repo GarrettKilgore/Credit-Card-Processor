@@ -1,0 +1,53 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to Lambda
+        run: |
+          zip function.zip LambdaCode.py
+          aws lambda update-function-code \
+            --function-name processCard \
+            --zip-file fileb://function.zip
+
+      - name: Wait for Lambda update to complete
+        run: |
+          aws lambda wait function-updated \
+            --function-name processCard
+
+      - name: Publish Lambda version and update staging alias
+        run: |
+          VERSION=$(aws lambda publish-version \
+            --function-name processCard \
+            --query 'Version' \
+            --output text)
+          echo "Published version: $VERSION"
+
+          # Create staging alias if it doesn't exist, otherwise update it
+          aws lambda create-alias \
+            --function-name processCard \
+            --name staging \
+            --function-version $VERSION 2>/dev/null || \
+          aws lambda update-alias \
+            --function-name processCard \
+            --name staging \
+            --function-version $VERSION
+
+          echo "Staging alias now points to version $VERSION"
