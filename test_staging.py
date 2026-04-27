@@ -30,18 +30,18 @@ print("\n=== RUNNING STAGING TESTS ===\n")
 # ─── MERCHANT AUTH TESTS ───
 print("--- Merchant Auth ---")
 test(
-    "Jeff's Bank debit accepted",
+    "Valid merchant auth",
     {
         "bank": "Jeffs Bank",
         "merchant_name": "Contact Climbing",
         "merchant_token": "BqzXGsPJ",
-        "card_holder": "Mia Thompson",
-        "cc_number": "4485921786505210",
-        "card_type": "debit",
-        "cvv": "512",
+        "card_holder": "Liam Carter",
+        "cc_number": "4532756279624064",
+        "card_type": "credit",
+        "cvv": "648",
         "amount": "3.25",
-        "card_zip": "84101",
-        "exp_date": "03/29",
+        "card_zip": "84770",
+        "exp_date": "04/28",
         "timestamp": "2026-04-27T00:00:00"
     },
     "Accepted"
@@ -108,13 +108,13 @@ test(
         "bank": "Jeffs Bank",
         "merchant_name": "Contact Climbing",
         "merchant_token": "BqzXGsPJ",
-        "card_holder": "Isabella Martinez",
-        "cc_number": "4556318984301377",
+        "card_holder": "Mia Thompson",
+        "cc_number": "4485921786505210",
         "card_type": "debit",
-        "cvv": "118",
+        "cvv": "512",
         "amount": "3.25",
-        "card_zip": "84097",
-        "exp_date": "06/29",
+        "card_zip": "84101",
+        "exp_date": "03/29",
         "timestamp": "2026-04-27T00:00:00"
     },
     "Accepted"
@@ -153,7 +153,7 @@ test(
         "exp_date": "05/28",
         "timestamp": "2026-04-27T00:00:00"
     },
-    "Approved"  # Corbin returns "Approved." not "Accepted."
+    "Approved"
 )
 
 test(
@@ -171,7 +171,7 @@ test(
         "exp_date": "04/28",
         "timestamp": "2026-04-27T00:00:00"
     },
-    "Approved"  # Wild West returns "Approved." not "Accepted."
+    "Approved"
 )
 
 test(
