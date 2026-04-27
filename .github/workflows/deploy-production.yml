@@ -22,9 +22,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Deploy to production (default stage)
+      - name: Deploy to Lambda
         run: |
-          zip function.zip LambdaCode.py
+          cp LambdaCode.py lambda_function.py
+          zip function.zip lambda_function.py
           aws lambda update-function-code \
             --function-name processCard \
             --zip-file fileb://function.zip
