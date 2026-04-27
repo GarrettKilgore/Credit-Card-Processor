@@ -27,7 +27,6 @@ def test(name, payload, expected):
 
 print("\n=== RUNNING STAGING TESTS ===\n")
 
-# ─── MERCHANT AUTH TESTS ───
 print("--- Merchant Auth ---")
 test(
     "Valid merchant auth",
